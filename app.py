@@ -3,31 +3,24 @@ import openai
 import json
 import requests
 
-# Sekrety i konfiguracja
+# Konfiguracja
 PASSWORD = st.secrets["APP_PASSWORD"]
 client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-AZURE_CV_KEY = st.secrets["AZURE_CV_KEY"]
-AZURE_CV_ENDPOINT = st.secrets["AZURE_CV_ENDPOINT"]
+# BLIP endpoint z Hugging Face Inference API (model: Salesforce/blip-image-captioning-base)
+HUGGINGFACE_API_TOKEN = st.secrets["HUGGINGFACE_API_TOKEN"]
+BLIP_API_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-base"
 
-# Funkcja do analizy obrazu przez Azure CV
-def analyze_image(image_data):
+# Funkcja do analizy obrazu przez BLIP
+def analyze_with_blip(image_bytes):
     headers = {
-        "Ocp-Apim-Subscription-Key": AZURE_CV_KEY,
+        "Authorization": f"Bearer {HUGGINGFACE_API_TOKEN}",
         "Content-Type": "application/octet-stream"
     }
-    params = {
-        "visualFeatures": "Description,Tags",
-        "language": "en"
-    }
-    response = requests.post(
-        url=f"{AZURE_CV_ENDPOINT}/vision/v3.2/analyze",
-        headers=headers,
-        params=params,
-        data=image_data
-    )
+    response = requests.post(BLIP_API_URL, headers=headers, data=image_bytes)
     response.raise_for_status()
-    return response.json()
+    result = response.json()
+    return result[0]["generated_text"]
 
 # Logowanie
 if "logged_in" not in st.session_state:
@@ -77,15 +70,10 @@ if uploaded_file:
     image_bytes = uploaded_file.read()
 
     try:
-        vision_result = analyze_image(image_bytes)
-        tags = vision_result.get("tags", [])
-        description = vision_result.get("description", {}).get("captions", [{}])[0].get("text", "Brak opisu")
-
-        vision_tags = [tag["name"] for tag in tags]
+        vision_description = analyze_with_blip(image_bytes)
 
         prompt = f'''
-        Na podstawie tego opisu: "{description}" oraz tagów {vision_tags},
-        wygeneruj ładny opis zdjęcia i zaproponuj 5 tagów (hashtagów).
+        Na podstawie tego opisu: "{vision_description}", wygeneruj ładny opis zdjęcia i zaproponuj 5 tagów (hashtagów).
         '''
 
         response = client.chat.completions.create(
