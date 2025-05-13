@@ -1,12 +1,35 @@
 import streamlit as st
 import openai
 import json
+import requests
 
-# Konfiguracja (sekrety)
+# Sekrety i konfiguracja
 PASSWORD = st.secrets["APP_PASSWORD"]
 client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# Login
+AZURE_CV_KEY = st.secrets["AZURE_CV_KEY"]
+AZURE_CV_ENDPOINT = st.secrets["AZURE_CV_ENDPOINT"]
+
+# Funkcja do analizy obrazu przez Azure CV
+def analyze_image(image_data):
+    headers = {
+        "Ocp-Apim-Subscription-Key": AZURE_CV_KEY,
+        "Content-Type": "application/octet-stream"
+    }
+    params = {
+        "visualFeatures": "Description,Tags",
+        "language": "en"
+    }
+    response = requests.post(
+        url=f"{AZURE_CV_ENDPOINT}/vision/v3.2/analyze",
+        headers=headers,
+        params=params,
+        data=image_data
+    )
+    response.raise_for_status()
+    return response.json()
+
+# Logowanie
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -19,7 +42,7 @@ if not st.session_state.logged_in:
 
 st.title("Asystent Opisywania i Tagowania Zdjęć z FAQ w Chmurze")
 
-# Ładowanie FAQ
+# FAQ
 with open("faq.json", "r", encoding="utf-8") as f:
     faq_data = json.load(f)
 
@@ -51,22 +74,30 @@ uploaded_file = st.file_uploader("Wgraj zdjęcie do analizy", type=["jpg", "png"
 
 if uploaded_file:
     st.image(uploaded_file, use_container_width=True)
+    image_bytes = uploaded_file.read()
 
-    vision_tags = ["dog", "grass", "sunny", "outdoor"]
-    vision_description = "A dog sitting on grass on a sunny day."
+    try:
+        vision_result = analyze_image(image_bytes)
+        tags = vision_result.get("tags", [])
+        description = vision_result.get("description", {}).get("captions", [{}])[0].get("text", "Brak opisu")
 
-    prompt = f'''
-    Na podstawie tego opisu: "{vision_description}" oraz tagów {vision_tags},
-    wygeneruj ładny opis zdjęcia i zaproponuj 5 tagów (hashtagów).
-    '''
+        vision_tags = [tag["name"] for tag in tags]
 
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "Jesteś pomocnym asystentem AI."},
-            {"role": "user", "content": prompt}
-        ]
-    )
+        prompt = f'''
+        Na podstawie tego opisu: "{description}" oraz tagów {vision_tags},
+        wygeneruj ładny opis zdjęcia i zaproponuj 5 tagów (hashtagów).
+        '''
 
-    st.subheader("Wygenerowany opis i tagi:")
-    st.write(response.choices[0].message.content)
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Jesteś pomocnym asystentem AI."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+
+        st.subheader("Wygenerowany opis i tagi:")
+        st.write(response.choices[0].message.content)
+
+    except Exception as e:
+        st.error(f"Błąd podczas analizy obrazu: {str(e)}")
