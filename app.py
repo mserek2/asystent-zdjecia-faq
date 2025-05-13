@@ -17,15 +17,41 @@ if not st.session_state.logged_in:
     else:
         st.stop()
 
-st.title("Asystent Opisu Obrazów i FAQ")
+st.title("Asystent Opisywania i Tagowania Zdjęć z FAQ w Chmurze")
+
+# Ładowanie FAQ
+with open("faq.json", "r", encoding="utf-8") as f:
+    faq_data = json.load(f)
+
+st.header("FAQ – Najczęściej zadawane pytania")
+
+faq_question = st.text_input("Zadaj pytanie (np. 'Jak działa system?')")
+
+matched = [
+    item["answer"]
+    for item in faq_data
+    if faq_question.lower() in item["question"].lower()
+]
+
+st.subheader("Odpowiedź:")
+if matched:
+    st.write(matched[0])
+elif faq_question:
+    st.write("Niestety, nie mogę Ci pomóc.")
+
+with st.expander("Pokaż pełną listę pytań z FAQ"):
+    for item in faq_data:
+        st.markdown(f"**Q:** {item['question']}")
+        st.markdown(f"**A:** {item['answer']}")
+        st.markdown("---")
+
+st.header("Analiza zdjęcia")
 
 uploaded_file = st.file_uploader("Wgraj zdjęcie do analizy", type=["jpg", "png", "jpeg"])
-faq_question = st.text_input("Zadaj pytanie (np. z FAQ)")
 
 if uploaded_file:
     st.image(uploaded_file, use_container_width=True)
 
-    # Symulowana analiza obrazu
     vision_tags = ["dog", "grass", "sunny", "outdoor"]
     vision_description = "A dog sitting on grass on a sunny day."
 
@@ -44,19 +70,3 @@ if uploaded_file:
 
     st.subheader("Wygenerowany opis i tagi:")
     st.write(response.choices[0].message.content)
-
-if faq_question:
-    with open("faq.json", "r", encoding="utf-8") as f:
-        faq_data = json.load(f)
-
-    matched = [
-        item["answer"]
-        for item in faq_data
-        if faq_question.lower() in item["question"].lower()
-    ]
-
-    st.subheader("Odpowiedź:")
-    if matched:
-        st.write(matched[0])
-    else:
-        st.write("Niestety, nie mogę Ci pomóc.")
