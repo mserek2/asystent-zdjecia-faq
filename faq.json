@@ -1,5 +1,5 @@
 [
-  {"question": "Jak działa system?", "answer": "System analizuje obraz modelem BLIP i generuje opis oraz tagi przez GPT."},
+  {"question": "Jak działa system?", "answer": "System analizuje obraz modelem ViT-GPT2 i generuje opis oraz tagi przez GPT."},
   {"question": "Czy mogę używać aplikacji za darmo?", "answer": "Tak, model GPT-3.5 jest dostępny przy darmowym limicie API."},
   {"question": "Jakie zdjęcia mogę przesłać?", "answer": "Możesz przesłać zdjęcia w formacie JPG, PNG lub JPEG do 200MB."},
   {"question": "Czy moje zdjęcia są przechowywane?", "answer": "Nie, zdjęcia nie są zapisywane ani archiwizowane."},

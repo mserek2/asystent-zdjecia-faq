@@ -8,15 +8,15 @@ PASSWORD = st.secrets["APP_PASSWORD"]
 client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 HUGGINGFACE_API_TOKEN = st.secrets["HUGGINGFACE_API_TOKEN"]
-BLIP_API_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large"
+IMAGE_CAPTION_API_URL = "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning"
 
-# Funkcja do analizy obrazu przez BLIP (wersja large)
-def analyze_with_blip(image_bytes):
+# Funkcja do analizy obrazu przez ViT-GPT2
+def analyze_with_vit_gpt2(image_bytes):
     headers = {
         "Authorization": f"Bearer {HUGGINGFACE_API_TOKEN}",
         "Content-Type": "application/octet-stream"
     }
-    response = requests.post(BLIP_API_URL, headers=headers, data=image_bytes)
+    response = requests.post(IMAGE_CAPTION_API_URL, headers=headers, data=image_bytes)
     response.raise_for_status()
     result = response.json()
     return result[0]["generated_text"]
@@ -69,7 +69,7 @@ if uploaded_file:
     image_bytes = uploaded_file.read()
 
     try:
-        vision_description = analyze_with_blip(image_bytes)
+        vision_description = analyze_with_vit_gpt2(image_bytes)
 
         prompt = f'''
         Na podstawie tego opisu: "{vision_description}", wygeneruj ładny opis zdjęcia i zaproponuj 5 tagów (hashtagów).
