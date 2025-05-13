@@ -7,11 +7,10 @@ import requests
 PASSWORD = st.secrets["APP_PASSWORD"]
 client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# BLIP endpoint z Hugging Face Inference API (model: Salesforce/blip-image-captioning-base)
 HUGGINGFACE_API_TOKEN = st.secrets["HUGGINGFACE_API_TOKEN"]
-BLIP_API_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-base"
+BLIP_API_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large"
 
-# Funkcja do analizy obrazu przez BLIP
+# Funkcja do analizy obrazu przez BLIP (wersja large)
 def analyze_with_blip(image_bytes):
     headers = {
         "Authorization": f"Bearer {HUGGINGFACE_API_TOKEN}",
