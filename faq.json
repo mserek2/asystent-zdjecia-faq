@@ -1,0 +1,4 @@
+[
+  {"question": "Jak działa system?", "answer": "System analizuje obraz i generuje opis oraz tagi."},
+  {"question": "Czy można zadać własne pytanie?", "answer": "Tak, możesz wpisać pytanie w polu tekstowym."}
+]
