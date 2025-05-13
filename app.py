@@ -1,25 +1,15 @@
 import streamlit as st
 import openai
+import base64
 import json
-import requests
 
 # Konfiguracja
 PASSWORD = st.secrets["APP_PASSWORD"]
 client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-HUGGINGFACE_API_TOKEN = st.secrets["HUGGINGFACE_API_TOKEN"]
-IMAGE_CAPTION_API_URL = "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning"
-
-# Funkcja do analizy obrazu przez ViT-GPT2
-def analyze_with_vit_gpt2(image_bytes):
-    headers = {
-        "Authorization": f"Bearer {HUGGINGFACE_API_TOKEN}",
-        "Content-Type": "application/octet-stream"
-    }
-    response = requests.post(IMAGE_CAPTION_API_URL, headers=headers, data=image_bytes)
-    response.raise_for_status()
-    result = response.json()
-    return result[0]["generated_text"]
+# Funkcja do zamiany obrazu na base64
+def image_to_base64(image_file):
+    return base64.b64encode(image_file.read()).decode("utf-8")
 
 # Logowanie
 if "logged_in" not in st.session_state:
@@ -66,21 +56,29 @@ uploaded_file = st.file_uploader("Wgraj zdjęcie do analizy", type=["jpg", "png"
 
 if uploaded_file:
     st.image(uploaded_file, use_container_width=True)
-    image_bytes = uploaded_file.read()
+    image_b64 = image_to_base64(uploaded_file)
 
     try:
-        vision_description = analyze_with_vit_gpt2(image_bytes)
-
-        prompt = f'''
-        Na podstawie tego opisu: "{vision_description}", wygeneruj ładny opis zdjęcia i zaproponuj 5 tagów (hashtagów).
-        '''
-
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o",
             messages=[
-                {"role": "system", "content": "Jesteś pomocnym asystentem AI."},
-                {"role": "user", "content": prompt}
-            ]
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "Co znajduje się na tym zdjęciu? Opisz je oraz zaproponuj 5 hashtagów."
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{image_b64}"
+                            }
+                        }
+                    ]
+                }
+            ],
+            max_tokens=500
         )
 
         st.subheader("Wygenerowany opis i tagi:")
