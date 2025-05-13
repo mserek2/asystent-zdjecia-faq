@@ -49,20 +49,14 @@ if faq_question:
     with open("faq.json", "r", encoding="utf-8") as f:
         faq_data = json.load(f)
 
-    found = next((item["answer"] for item in faq_data if faq_question.lower() in item["question"].lower()), None)
-    
-    if found:
-        st.subheader("Odpowiedź z FAQ:")
-        st.write(found)
-    else:
-        fallback_prompt = f"Użytkownik zapytał: {faq_question}. Odpowiedz zgodnie z treścią FAQ."
+    matched = [
+        item["answer"]
+        for item in faq_data
+        if faq_question.lower() in item["question"].lower()
+    ]
 
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "Odpowiadasz na pytania na podstawie FAQ."},
-                {"role": "user", "content": fallback_prompt}
-            ]
-        )
-        st.subheader("Odpowiedź z modelu:")
-        st.write(response.choices[0].message.content)
+    st.subheader("Odpowiedź:")
+    if matched:
+        st.write(matched[0])
+    else:
+        st.write("Niestety, nie mogę Ci pomóc.")
