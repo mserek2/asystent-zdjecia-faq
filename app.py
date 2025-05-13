@@ -35,7 +35,7 @@ if uploaded_file:
     '''
 
     response = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "Jesteś pomocnym asystentem AI."},
             {"role": "user", "content": prompt}
@@ -58,7 +58,7 @@ if faq_question:
         fallback_prompt = f"Użytkownik zapytał: {faq_question}. Odpowiedz zgodnie z treścią FAQ."
 
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "Odpowiadasz na pytania na podstawie FAQ."},
                 {"role": "user", "content": fallback_prompt}
