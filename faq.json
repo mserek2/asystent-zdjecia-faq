@@ -1,10 +1,10 @@
 [
   {"question": "Jak działa system?", "answer": "System przesyła zdjęcie do modelu GPT-4o, który generuje opis i tagi."},
-  {"question": "Czy mogę używać aplikacji za darmo?", "answer": "Tak, jeśli masz środki w koncie OpenAI API."},
-  {"question": "Jakie zdjęcia mogę przesłać?", "answer": "Możesz przesłać zdjęcia w formacie JPG, PNG lub JPEG do 200MB."},
+  {"question": "Czy mogę używać aplikacji za darmo?", "answer": "Tak, ja płacę."},
+  {"question": "Jakie zdjęcia mogę przesłać?", "answer": "Możesz przesłać zdjęcia w formacie JPG, PNG lub JPEG."},
   {"question": "Czy moje zdjęcia są przechowywane?", "answer": "Nie, zdjęcia nie są zapisywane ani archiwizowane."},
   {"question": "Jak długo trwa analiza?", "answer": "Zwykle kilka sekund od przesłania pliku."},
-  {"question": "Czy mogę zadawać własne pytania?", "answer": "Tak, możesz wpisać pytanie w polu tekstowym powyżej."},
+  {"question": "Czy mogę zadawać własne pytania?", "answer": "Tak, możesz wpisać pytanie w polu tekstowym powyżej ale odpowiedzi są ściśle zdefiniowane."},
   {"question": "Czy system potrafi rozpoznawać tekst na zdjęciach?", "answer": "Tak, GPT-4o potrafi również rozpoznawać tekst."},
   {"question": "Jakie modele językowe są używane?", "answer": "System korzysta z GPT-4o, najnowszego modelu OpenAI."},
   {"question": "Czy mogę pobrać wyniki analizy?", "answer": "Nie, ale możesz je skopiować ręcznie."},
