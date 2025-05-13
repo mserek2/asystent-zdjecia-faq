@@ -3,8 +3,8 @@ import openai
 import json
 
 # Konfiguracja (sekrety)
-PASSWORD = "demo2024"
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+PASSWORD = st.secrets["APP_PASSWORD"]
+client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # Login
 if "logged_in" not in st.session_state:
@@ -23,22 +23,23 @@ uploaded_file = st.file_uploader("Wgraj zdjęcie do analizy", type=["jpg", "png"
 faq_question = st.text_input("Zadaj pytanie (np. z FAQ)")
 
 if uploaded_file:
-    st.image(uploaded_file, use_column_width=True)
+    st.image(uploaded_file, use_container_width=True)
 
-    # Tu powinno być wywołanie Azure Computer Vision API
-    # Symulacja:
+    # Symulowana analiza obrazu
     vision_tags = ["dog", "grass", "sunny", "outdoor"]
     vision_description = "A dog sitting on grass on a sunny day."
 
-    prompt = f"""
+    prompt = f'''
     Na podstawie tego opisu: "{vision_description}" oraz tagów {vision_tags},
     wygeneruj ładny opis zdjęcia i zaproponuj 5 tagów (hashtagów).
-    """
+    '''
 
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
-        messages=[{"role": "system", "content": "Jesteś pomocnym asystentem AI."},
-                  {"role": "user", "content": prompt}]
+        messages=[
+            {"role": "system", "content": "Jesteś pomocnym asystentem AI."},
+            {"role": "user", "content": prompt}
+        ]
     )
 
     st.subheader("Wygenerowany opis i tagi:")
@@ -55,10 +56,13 @@ if faq_question:
         st.write(found)
     else:
         fallback_prompt = f"Użytkownik zapytał: {faq_question}. Odpowiedz zgodnie z treścią FAQ."
-        response = openai.ChatCompletion.create(
+
+        response = client.chat.completions.create(
             model="gpt-4",
-            messages=[{"role": "system", "content": "Odpowiadasz na pytania na podstawie FAQ."},
-                      {"role": "user", "content": fallback_prompt}]
+            messages=[
+                {"role": "system", "content": "Odpowiadasz na pytania na podstawie FAQ."},
+                {"role": "user", "content": fallback_prompt}
+            ]
         )
         st.subheader("Odpowiedź z modelu:")
         st.write(response.choices[0].message.content)
